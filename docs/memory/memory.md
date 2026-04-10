@@ -115,3 +115,4 @@ Feature completion checklist:
 | Session | Date | What Was Done |
 |---------|------|---------------|
 | session-001-arch-to-impl | 2026-04-10 | Architecture docs (24 files), Master repo plan, CLAUDE.md files for Set 1, Memory setup |
+| session-001-phase1 (SigOps) | 2026-04-10 | SigOps Phase 1 backend complete: Config + DB (9 tables) + 7 domain modules (signals, signal-rules, workflows, executions, agents, tools, schedules). 128 tests passing, coverage 99.66%/98.72%/100%/99.66% (stmts/branch/funcs/lines). Branch: claude/phase-1-setup-BOMET. |
