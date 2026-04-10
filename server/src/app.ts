@@ -10,6 +10,8 @@ import agents from "./modules/agents/agents.routes.js";
 import tools from "./modules/tools/tools.routes.js";
 import signalRules from "./modules/signal-rules/signal-rules.routes.js";
 import workflowSchedules from "./modules/workflow-schedules/workflow-schedules.routes.js";
+import executionSteps from "./modules/execution-steps/execution-steps.routes.js";
+import agentTools from "./modules/agent-tools/agent-tools.routes.js";
 
 export function createApp() {
   const app = new Hono();
@@ -41,6 +43,8 @@ export function createApp() {
   app.route("/api/v1/tools", tools);
   app.route("/api/v1/signal-rules", signalRules);
   app.route("/api/v1/workflow-schedules", workflowSchedules);
+  app.route("/api/v1/execution-steps", executionSteps);
+  app.route("/api/v1/agent-tools", agentTools);
 
   return app;
 }

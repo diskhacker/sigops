@@ -145,3 +145,46 @@ export const workflowSchedules = pgTable(
   },
   (t) => [index("idx_schedules_tenant").on(t.tenantId)],
 );
+
+export const executionSteps = pgTable(
+  "execution_steps",
+  {
+    id: id(),
+    tenantId: tenantId(),
+    executionId: text("execution_id").notNull(),
+    stepIndex: integer("step_index").notNull(),
+    toolName: text("tool_name").notNull(),
+    input: jsonb("input").notNull(),
+    output: jsonb("output"),
+    status: text("status").notNull().default("PENDING"),
+    agentId: text("agent_id"),
+    startedAt: timestamp("started_at"),
+    completedAt: timestamp("completed_at"),
+    durationMs: integer("duration_ms"),
+    error: text("error"),
+    retryCount: integer("retry_count").notNull().default(0),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    index("idx_exec_steps_execution").on(t.executionId),
+    index("idx_exec_steps_tenant").on(t.tenantId),
+  ],
+);
+
+export const agentTools = pgTable(
+  "agent_tools",
+  {
+    id: id(),
+    tenantId: tenantId(),
+    agentId: text("agent_id").notNull(),
+    toolName: text("tool_name").notNull(),
+    version: text("version"),
+    capabilities: jsonb("capabilities").notNull().default([]),
+    discoveredAt: timestamp("discovered_at").notNull().defaultNow(),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    index("idx_agent_tools_agent").on(t.agentId),
+    index("idx_agent_tools_tenant").on(t.tenantId),
+  ],
+);
