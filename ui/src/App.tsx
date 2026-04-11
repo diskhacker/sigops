@@ -8,6 +8,8 @@ import AgentsPage from "./pages/AgentsPage.js";
 import ToolsPage from "./pages/ToolsPage.js";
 import SignalRulesPage from "./pages/SignalRulesPage.js";
 import WorkflowSchedulesPage from "./pages/WorkflowSchedulesPage.js";
+import ExecutionStepsPage from "./pages/ExecutionStepsPage.js";
+import AgentToolsPage from "./pages/AgentToolsPage.js";
 
 export default function App() {
   return (
@@ -22,6 +24,8 @@ export default function App() {
         <Route path="tools" element={<ToolsPage />} />
         <Route path="signal-rules" element={<SignalRulesPage />} />
         <Route path="workflow-schedules" element={<WorkflowSchedulesPage />} />
+        <Route path="execution-steps" element={<ExecutionStepsPage />} />
+        <Route path="agent-tools" element={<AgentToolsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>

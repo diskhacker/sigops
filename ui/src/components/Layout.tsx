@@ -23,6 +23,8 @@ const NAV = [
   { to: "/tools", label: "Tools" },
   { to: "/signal-rules", label: "Signal Rules" },
   { to: "/workflow-schedules", label: "Workflow Schedules" },
+  { to: "/execution-steps", label: "Execution Steps" },
+  { to: "/agent-tools", label: "Agent Tools" },
 ];
 
 export default function Layout() {
