@@ -12,6 +12,8 @@ import signalRules from "./modules/signal-rules/signal-rules.routes.js";
 import workflowSchedules from "./modules/workflow-schedules/workflow-schedules.routes.js";
 import executionSteps from "./modules/execution-steps/execution-steps.routes.js";
 import agentTools from "./modules/agent-tools/agent-tools.routes.js";
+import ingest from "./modules/ingest/ingest.routes.js";
+import stats from "./modules/stats/stats.routes.js";
 
 export function createApp() {
   const app = new Hono();
@@ -45,6 +47,8 @@ export function createApp() {
   app.route("/api/v1/workflow-schedules", workflowSchedules);
   app.route("/api/v1/execution-steps", executionSteps);
   app.route("/api/v1/agent-tools", agentTools);
+  app.route("/api/v1/ingest", ingest);
+  app.route("/api/v1/stats", stats);
 
   return app;
 }
