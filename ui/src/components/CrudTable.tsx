@@ -26,8 +26,9 @@ export type Column = { key: string; label: string };
 export type Field = {
   key: string;
   label: string;
-  type?: "text" | "number" | "json" | "email";
+  type?: "text" | "number" | "json" | "email" | "code";
   required?: boolean;
+  rows?: number;
 };
 
 export type CrudTableProps = {
@@ -231,8 +232,12 @@ export default function CrudTable({
                 onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
                 required={f.required}
                 fullWidth
-                multiline={f.type === "json"}
-                inputProps={{ "data-testid": `field-${f.key}` }}
+                multiline={f.type === "json" || f.type === "code"}
+                minRows={f.type === "code" ? (f.rows ?? 10) : undefined}
+                inputProps={{
+                  "data-testid": `field-${f.key}`,
+                  style: f.type === "code" ? { fontFamily: "monospace" } : undefined,
+                }}
               />
             ))}
           </Stack>

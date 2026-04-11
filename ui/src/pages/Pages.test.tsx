@@ -17,6 +17,8 @@ import AgentsPage from "./AgentsPage.js";
 import ToolsPage from "./ToolsPage.js";
 import SignalRulesPage from "./SignalRulesPage.js";
 import WorkflowSchedulesPage from "./WorkflowSchedulesPage.js";
+import ExecutionStepsPage from "./ExecutionStepsPage.js";
+import AgentToolsPage from "./AgentToolsPage.js";
 import { withProviders } from "../test/helpers.js";
 
 describe("Page smoke tests", () => {
@@ -28,6 +30,8 @@ describe("Page smoke tests", () => {
     ["Tools", ToolsPage],
     ["Signal Rules", SignalRulesPage],
     ["Workflow Schedules", WorkflowSchedulesPage],
+    ["Execution Steps", ExecutionStepsPage],
+    ["Agent Tools", AgentToolsPage],
   ] as const;
 
   for (const [name, Comp] of cases) {
