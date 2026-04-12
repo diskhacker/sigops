@@ -3,7 +3,7 @@
  * returns the best-matching rule (highest priority) to auto-trigger
  * a workflow.
  *
- * Rule conditions (stored in `pattern` jsonb):
+ * Rule conditions (stored in `condition` jsonb):
  *   - source: exact match on signal source
  *   - severityGte: signal severity >= threshold (critical > warning > info)
  *   - titleRegex: regex match on signal title
@@ -17,7 +17,7 @@ export interface SignalPayload {
   body: Record<string, unknown>;
 }
 
-export interface RulePattern {
+export interface RuleCondition {
   source?: string;
   severityGte?: string;
   titleRegex?: string;
@@ -27,7 +27,7 @@ export interface RulePattern {
 export interface MatchableRule {
   id: string;
   name: string;
-  pattern: RulePattern;
+  condition: RuleCondition;
   workflowId: string;
   priority: number;
   isActive: boolean;
@@ -53,19 +53,19 @@ export function severityGte(actual: string, threshold: string): boolean {
   return a >= t;
 }
 
-export function matchesRule(signal: SignalPayload, pattern: RulePattern): boolean {
+export function matchesRule(signal: SignalPayload, condition: RuleCondition): boolean {
   // Source match
-  if (pattern.source && pattern.source !== signal.source) return false;
+  if (condition.source && condition.source !== signal.source) return false;
 
   // Severity threshold
-  if (pattern.severityGte && !severityGte(signal.severity, pattern.severityGte)) {
+  if (condition.severityGte && !severityGte(signal.severity, condition.severityGte)) {
     return false;
   }
 
   // Title regex
-  if (pattern.titleRegex) {
+  if (condition.titleRegex) {
     try {
-      const re = new RegExp(pattern.titleRegex, "i");
+      const re = new RegExp(condition.titleRegex, "i");
       if (!re.test(signal.title)) return false;
     } catch {
       return false;
@@ -73,8 +73,8 @@ export function matchesRule(signal: SignalPayload, pattern: RulePattern): boolea
   }
 
   // Body jsonpath (simple dot-path check)
-  if (pattern.bodyJsonpath) {
-    const value = resolveDotPath(signal.body, pattern.bodyJsonpath);
+  if (condition.bodyJsonpath) {
+    const value = resolveDotPath(signal.body, condition.bodyJsonpath);
     if (value === undefined) return false;
   }
 
@@ -100,7 +100,7 @@ export function findBestMatch(
     .sort((a, b) => b.priority - a.priority);
 
   for (const rule of activeRules) {
-    if (matchesRule(signal, rule.pattern)) {
+    if (matchesRule(signal, rule.condition)) {
       return {
         matched: true,
         rule,

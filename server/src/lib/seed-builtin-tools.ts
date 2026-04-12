@@ -1,10 +1,11 @@
 /**
- * Seed built-in SEL tools into the tool registry for a tenant.
- * Idempotent: skips entries already seeded for (tenantId, name, version).
+ * Seed built-in SEL tools into the tool registry.
+ * Idempotent: skips entries already seeded for (name, version).
+ * Tool registry is global (no tenant scope).
  */
 import { and, eq } from "drizzle-orm";
 import { db as defaultDb } from "../db/index.js";
-import { tools } from "../db/schema.js";
+import { toolRegistry } from "../db/schema.js";
 
 export const BUILTIN_TOOL_VERSION = "1.0.0";
 
@@ -53,7 +54,6 @@ export interface SeedResult {
 }
 
 export async function seedBuiltinTools(
-  tenantId: string,
   database: SeedDb = defaultDb,
 ): Promise<SeedResult> {
   const inserted: string[] = [];
@@ -62,12 +62,11 @@ export async function seedBuiltinTools(
   for (const spec of BUILTIN_TOOL_SPECS) {
     const existing = await database
       .select()
-      .from(tools)
+      .from(toolRegistry)
       .where(
         and(
-          eq(tools.tenantId, tenantId),
-          eq(tools.name, spec.name),
-          eq(tools.version, BUILTIN_TOOL_VERSION),
+          eq(toolRegistry.name, spec.name),
+          eq(toolRegistry.version, BUILTIN_TOOL_VERSION),
         ),
       )
       .limit(1);
@@ -75,12 +74,11 @@ export async function seedBuiltinTools(
       skipped.push(spec.name);
       continue;
     }
-    await database.insert(tools).values({
-      tenantId,
+    await database.insert(toolRegistry).values({
       name: spec.name,
       version: BUILTIN_TOOL_VERSION,
       type: "builtin",
-      schema: spec.inputSchema,
+      inputSchema: spec.inputSchema,
       description: spec.description,
     });
     inserted.push(spec.name);

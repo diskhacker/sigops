@@ -46,7 +46,7 @@ describe("seedBuiltinTools", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any;
 
-    const result = await seedBuiltinTools("tenant-1", db);
+    const result = await seedBuiltinTools(db);
     expect(result.inserted).toHaveLength(5);
     expect(result.skipped).toHaveLength(0);
     expect(result.inserted).toContain("sigops.http");
@@ -63,7 +63,7 @@ describe("seedBuiltinTools", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any;
 
-    const result = await seedBuiltinTools("tenant-1", db);
+    const result = await seedBuiltinTools(db);
     expect(result.inserted).toHaveLength(0);
     expect(result.skipped).toHaveLength(5);
   });

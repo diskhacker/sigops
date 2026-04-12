@@ -22,7 +22,7 @@ beforeEach(() => resetMockDb());
 describe("agents routes", () => {
   it("lists", async () => {
     queueResults([[{ id: "r1" }], [{ count: 1 }]]);
-    expect((await app.request("/r?status=x")).status).toBe(200);
+    expect((await app.request("/r?status=ONLINE")).status).toBe(200);
   });
 
   it("get one", async () => {
@@ -40,7 +40,7 @@ describe("agents routes", () => {
     const res = await app.request("/r", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({hostname: "x", version: "x"}),
+      body: JSON.stringify({hostname: "x", agentVersion: "x"}),
     });
     expect(res.status).toBe(201);
   });
@@ -59,7 +59,7 @@ describe("agents routes", () => {
     const res = await app.request("/r/r1", {
       method: "PUT",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({status: "x"}),
+      body: JSON.stringify({status: "ONLINE"}),
     });
     expect(res.status).toBe(200);
   });
@@ -69,7 +69,7 @@ describe("agents routes", () => {
     const res = await app.request("/r/x", {
       method: "PUT",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({status: "x"}),
+      body: JSON.stringify({status: "ONLINE"}),
     });
     expect(res.status).toBe(404);
   });

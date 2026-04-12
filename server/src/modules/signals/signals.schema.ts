@@ -16,7 +16,7 @@ export const updateSignalSchema = z.object({
 
 export const searchSignalSchema = z.object({
   q: z.string().optional(),
-  severity: z.string().optional(),
-  status: z.string().optional(),
+  severity: z.enum(["critical", "warning", "info"]).optional(),
+  status: z.enum(["OPEN", "ACKNOWLEDGED", "RESOLVED", "SUPPRESSED"]).optional(),
   source: z.string().optional(),
 });

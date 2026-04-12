@@ -119,7 +119,7 @@ export async function runCronTick(
   for (const s of active) {
     let parsed: ParsedCron;
     try {
-      parsed = parseCron(s.cron);
+      parsed = parseCron(s.cronExpression);
     } catch {
       continue;
     }

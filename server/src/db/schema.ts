@@ -6,6 +6,8 @@ import {
   boolean,
   jsonb,
   index,
+  uniqueIndex,
+  pgEnum,
 } from "drizzle-orm/pg-core";
 
 const id = () =>
@@ -20,17 +22,49 @@ const updatedAt = () =>
     .defaultNow()
     .$onUpdateFn(() => new Date());
 
+export const severityEnum = pgEnum("severity", [
+  "critical",
+  "warning",
+  "info",
+]);
+export const signalStatusEnum = pgEnum("signal_status", [
+  "OPEN",
+  "ACKNOWLEDGED",
+  "RESOLVED",
+  "SUPPRESSED",
+]);
+export const execStatusEnum = pgEnum("exec_status", [
+  "PENDING",
+  "RUNNING",
+  "SUCCESS",
+  "FAILED",
+  "ROLLED_BACK",
+  "CANCELLED",
+]);
+export const stepStatusEnum = pgEnum("step_status", [
+  "PENDING",
+  "RUNNING",
+  "SUCCESS",
+  "FAILED",
+  "SKIPPED",
+]);
+export const agentStatusEnum = pgEnum("agent_status", [
+  "ONLINE",
+  "DEGRADED",
+  "OFFLINE",
+]);
+
 export const signals = pgTable(
   "signals",
   {
     id: id(),
     tenantId: tenantId(),
     source: text("source").notNull(),
-    severity: text("severity").notNull(),
+    severity: severityEnum("severity").notNull(),
     title: text("title").notNull(),
     body: jsonb("body").notNull(),
     fingerprint: text("fingerprint").notNull(),
-    status: text("status").notNull().default("OPEN"),
+    status: signalStatusEnum("status").default("OPEN").notNull(),
     matchedWorkflowId: text("matched_workflow_id"),
     matchedAt: timestamp("matched_at"),
     resolvedAt: timestamp("resolved_at"),
@@ -40,9 +74,9 @@ export const signals = pgTable(
     updatedAt: updatedAt(),
   },
   (t) => [
-    index("idx_signals_tenant").on(t.tenantId),
-    index("idx_signals_fingerprint").on(t.fingerprint),
-    index("idx_signals_status").on(t.status),
+    index("sig_tenant_created").on(t.tenantId, t.createdAt),
+    index("sig_fingerprint").on(t.fingerprint),
+    index("sig_status").on(t.status),
   ],
 );
 
@@ -62,7 +96,7 @@ export const workflows = pgTable(
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
-  (t) => [index("idx_workflows_tenant").on(t.tenantId)],
+  (t) => [index("wf_tenant_active").on(t.tenantId, t.isActive)],
 );
 
 export const executions = pgTable(
@@ -73,12 +107,10 @@ export const executions = pgTable(
     workflowId: text("workflow_id").notNull(),
     signalId: text("signal_id"),
     agentId: text("agent_id"),
-    status: text("status").notNull().default("PENDING"),
+    status: execStatusEnum("status").default("PENDING").notNull(),
     triggerType: text("trigger_type").notNull(),
     triggeredBy: text("triggered_by"),
     riskScore: jsonb("risk_score"),
-    steps: jsonb("steps").notNull().default([]),
-    currentStep: text("current_step"),
     error: jsonb("error"),
     startedAt: timestamp("started_at"),
     completedAt: timestamp("completed_at"),
@@ -87,8 +119,8 @@ export const executions = pgTable(
     updatedAt: updatedAt(),
   },
   (t) => [
-    index("idx_executions_tenant").on(t.tenantId),
-    index("idx_executions_status").on(t.status),
+    index("exec_tenant_created").on(t.tenantId, t.createdAt),
+    index("exec_status").on(t.status),
   ],
 );
 
@@ -100,31 +132,30 @@ export const agents = pgTable(
     hostname: text("hostname").notNull(),
     ipAddress: text("ip_address"),
     os: text("os"),
-    version: text("version").notNull(),
-    status: text("status").notNull().default("ONLINE"),
-    tools: jsonb("tools").notNull().default([]),
+    agentVersion: text("agent_version").notNull(),
+    status: agentStatusEnum("status").default("ONLINE").notNull(),
+    tools: jsonb("tools").default([]),
     labels: jsonb("labels").default({}),
     lastHeartbeat: timestamp("last_heartbeat"),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
-  (t) => [index("idx_agents_tenant").on(t.tenantId)],
+  (t) => [index("agent_tenant_status").on(t.tenantId, t.status)],
 );
 
-export const tools = pgTable(
+export const toolRegistry = pgTable(
   "tool_registry",
   {
     id: id(),
-    tenantId: tenantId(),
     name: text("name").notNull(),
     version: text("version").notNull(),
     type: text("type").notNull(),
-    schema: jsonb("schema").notNull(),
     description: text("description"),
+    inputSchema: jsonb("input_schema").notNull(),
+    outputSchema: jsonb("output_schema"),
     createdAt: createdAt(),
-    updatedAt: updatedAt(),
   },
-  (t) => [index("idx_tools_tenant").on(t.tenantId)],
+  (t) => [uniqueIndex("tool_name_version").on(t.name, t.version)],
 );
 
 export const signalRules = pgTable(
@@ -134,11 +165,11 @@ export const signalRules = pgTable(
     tenantId: tenantId(),
     name: text("name").notNull(),
     description: text("description"),
-    pattern: jsonb("pattern").notNull(),
-    workflowId: text("workflow_id").notNull(),
+    condition: jsonb("condition").notNull(),
+    workflowId: text("workflow_id"),
     dedupWindowSec: integer("dedup_window_sec").default(300),
     suppressWindowSec: integer("suppress_window_sec"),
-    priority: integer("priority").notNull().default(100),
+    priority: integer("priority").default(0),
     isActive: boolean("is_active").notNull().default(true),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
@@ -152,14 +183,16 @@ export const workflowSchedules = pgTable(
     id: id(),
     tenantId: tenantId(),
     workflowId: text("workflow_id").notNull(),
-    cron: text("cron").notNull(),
-    timezone: text("timezone").notNull().default("UTC"),
+    cronExpression: text("cron_expression").notNull(),
+    timezone: text("timezone").default("UTC"),
     isActive: boolean("is_active").notNull().default(true),
+    nextRunAt: timestamp("next_run_at"),
     lastRunAt: timestamp("last_run_at"),
+    lastRunStatus: text("last_run_status"),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
-  (t) => [index("idx_schedules_tenant").on(t.tenantId)],
+  (t) => [index("ws_active_next").on(t.isActive, t.nextRunAt)],
 );
 
 export const executionSteps = pgTable(
@@ -172,18 +205,17 @@ export const executionSteps = pgTable(
     toolName: text("tool_name").notNull(),
     input: jsonb("input").notNull(),
     output: jsonb("output"),
-    status: text("status").notNull().default("PENDING"),
+    status: stepStatusEnum("status").default("PENDING").notNull(),
     agentId: text("agent_id"),
     startedAt: timestamp("started_at"),
     completedAt: timestamp("completed_at"),
     durationMs: integer("duration_ms"),
     error: text("error"),
-    retryCount: integer("retry_count").notNull().default(0),
+    retryCount: integer("retry_count").default(0),
     createdAt: createdAt(),
   },
   (t) => [
     index("idx_exec_steps_execution").on(t.executionId),
-    index("idx_exec_steps_tenant").on(t.tenantId),
   ],
 );
 

@@ -82,7 +82,7 @@ describe("matchesRule", () => {
     ).toBe(false);
   });
 
-  it("matches empty pattern (catch-all)", () => {
+  it("matches empty condition (catch-all)", () => {
     expect(matchesRule(signal, {})).toBe(true);
   });
 
@@ -101,15 +101,15 @@ describe("findBestMatch", () => {
 
   const rules: MatchableRule[] = [
     {
-      id: "r1", name: "low-prio", pattern: { source: "prometheus" },
+      id: "r1", name: "low-prio", condition: { source: "prometheus" },
       workflowId: "w1", priority: 10, isActive: true,
     },
     {
-      id: "r2", name: "high-prio", pattern: { source: "prometheus", severityGte: "critical" },
+      id: "r2", name: "high-prio", condition: { source: "prometheus", severityGte: "critical" },
       workflowId: "w2", priority: 100, isActive: true,
     },
     {
-      id: "r3", name: "inactive", pattern: { source: "prometheus" },
+      id: "r3", name: "inactive", condition: { source: "prometheus" },
       workflowId: "w3", priority: 200, isActive: false,
     },
   ];

@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { and, eq, sql } from "drizzle-orm";
 import { db } from "../../db/index.js";
-import { tools } from "../../db/schema.js";
+import { toolRegistry } from "../../db/schema.js";
 import { requireAuth } from "../../middleware/auth.js";
 import { NotFoundError } from "../../lib/errors.js";
 import { paginationSchema, getOffset, buildPageResponse } from "../../lib/pagination.js";
@@ -16,65 +16,61 @@ const router = new Hono<{ Variables: AppVariables }>();
 router.use("*", requireAuth);
 
 router.get("/", async (c) => {
-  const tenantId = c.get("tenantId");
   const pagination = paginationSchema.parse(c.req.query());
   const search = searchToolSchema.parse(c.req.query());
-  const conds = [eq(tools.tenantId, tenantId)];
-  if (search.type) conds.push(eq(tools.type, search.type));
+  const conds = [];
+  if (search.type) conds.push(eq(toolRegistry.type, search.type));
+  if (search.name) conds.push(eq(toolRegistry.name, search.name));
   const items = await db
     .select()
-    .from(tools)
-    .where(and(...conds))
+    .from(toolRegistry)
+    .where(conds.length ? and(...conds) : undefined)
     .limit(pagination.pageSize)
     .offset(getOffset(pagination));
   const [{ count }] = await db
     .select({ count: sql<number>`count(*)::int` })
-    .from(tools)
-    .where(and(...conds));
+    .from(toolRegistry)
+    .where(conds.length ? and(...conds) : undefined);
   return c.json(buildPageResponse(items, count, pagination));
 });
 
 router.get("/:id", async (c) => {
-  const tenantId = c.get("tenantId");
   const id = c.req.param("id");
   const [row] = await db
     .select()
-    .from(tools)
-    .where(and(eq(tools.id, id), eq(tools.tenantId, tenantId)))
+    .from(toolRegistry)
+    .where(eq(toolRegistry.id, id))
     .limit(1);
   if (!row) throw new NotFoundError("Tool");
   return c.json(row);
 });
 
 router.post("/", async (c) => {
-  const tenantId = c.get("tenantId");
   const body = createToolSchema.parse(await c.req.json());
   const [row] = await db
-    .insert(tools)
-    .values({ ...body, tenantId })
+    .insert(toolRegistry)
+    .values(body)
     .returning();
   return c.json(row, 201);
 });
 
 router.put("/:id", async (c) => {
-  const tenantId = c.get("tenantId");
   const id = c.req.param("id");
   const body = updateToolSchema.parse(await c.req.json());
   const [row] = await db
-    .update(tools)
+    .update(toolRegistry)
     .set(body)
-    .where(and(eq(tools.id, id), eq(tools.tenantId, tenantId)))
+    .where(eq(toolRegistry.id, id))
     .returning();
   if (!row) throw new NotFoundError("Tool");
   return c.json(row);
 });
 
 router.delete("/:id", async (c) => {
-  const tenantId = c.get("tenantId");
   const id = c.req.param("id");
   const [row] = await db
-    .delete(tools)
-    .where(and(eq(tools.id, id), eq(tools.tenantId, tenantId)))
+    .delete(toolRegistry)
+    .where(eq(toolRegistry.id, id))
     .returning();
   if (!row) throw new NotFoundError("Tool");
   return c.json({ success: true });
