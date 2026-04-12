@@ -2,13 +2,13 @@ import { z } from "zod";
 
 export const createWorkflowScheduleSchema = z.object({
   workflowId: z.string().min(1),
-  cron: z.string().min(1),
+  cronExpression: z.string().min(1),
   timezone: z.string().min(1).optional(),
   isActive: z.boolean().optional(),
 });
 
 export const updateWorkflowScheduleSchema = z.object({
-  cron: z.string().min(1).optional(),
+  cronExpression: z.string().min(1).optional(),
   timezone: z.string().min(1).optional(),
   isActive: z.boolean().optional(),
 });

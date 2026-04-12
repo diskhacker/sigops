@@ -40,7 +40,7 @@ describe("signal-rules routes", () => {
     const res = await app.request("/r", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({name: "x", pattern: {}, workflowId: "x"}),
+      body: JSON.stringify({name: "x", condition: {}, workflowId: "x"}),
     });
     expect(res.status).toBe(201);
   });

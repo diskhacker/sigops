@@ -40,7 +40,7 @@ describe("workflow-schedules routes", () => {
     const res = await app.request("/r", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({workflowId: "x", cron: "x"}),
+      body: JSON.stringify({workflowId: "x", cronExpression: "x"}),
     });
     expect(res.status).toBe(201);
   });
@@ -59,7 +59,7 @@ describe("workflow-schedules routes", () => {
     const res = await app.request("/r/r1", {
       method: "PUT",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({cron: "x"}),
+      body: JSON.stringify({cronExpression: "x"}),
     });
     expect(res.status).toBe(200);
   });
@@ -69,7 +69,7 @@ describe("workflow-schedules routes", () => {
     const res = await app.request("/r/x", {
       method: "PUT",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({cron: "x"}),
+      body: JSON.stringify({cronExpression: "x"}),
     });
     expect(res.status).toBe(404);
   });

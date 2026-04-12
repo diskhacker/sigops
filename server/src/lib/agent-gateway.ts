@@ -40,7 +40,12 @@ export async function handleHeartbeat(
   now: Date = new Date(),
   database: Db = defaultDb,
 ): Promise<HeartbeatResult> {
-  const updates: Record<string, unknown> = {
+  const updates: {
+    lastHeartbeat: Date;
+    status: "ONLINE";
+    tools?: unknown[];
+    labels?: Record<string, unknown>;
+  } = {
     lastHeartbeat: now,
     status: "ONLINE",
   };
@@ -66,7 +71,7 @@ export async function handleHeartbeat(
         id: payload.agentId,
         tenantId: payload.tenantId,
         hostname: payload.agentId,
-        version: "unknown",
+        agentVersion: "unknown",
         status: "ONLINE",
         lastHeartbeat: now,
         tools: payload.tools ?? [],

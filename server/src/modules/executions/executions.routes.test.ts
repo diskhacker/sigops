@@ -22,7 +22,7 @@ beforeEach(() => resetMockDb());
 describe("executions routes", () => {
   it("lists", async () => {
     queueResults([[{ id: "r1" }], [{ count: 1 }]]);
-    expect((await app.request("/r?workflowId=x&status=x")).status).toBe(200);
+    expect((await app.request("/r?workflowId=x&status=PENDING")).status).toBe(200);
   });
 
   it("get one", async () => {
@@ -59,7 +59,7 @@ describe("executions routes", () => {
     const res = await app.request("/r/r1", {
       method: "PUT",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({status: "x"}),
+      body: JSON.stringify({status: "RUNNING"}),
     });
     expect(res.status).toBe(200);
   });
@@ -69,7 +69,7 @@ describe("executions routes", () => {
     const res = await app.request("/r/x", {
       method: "PUT",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({status: "x"}),
+      body: JSON.stringify({status: "RUNNING"}),
     });
     expect(res.status).toBe(404);
   });

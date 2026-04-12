@@ -131,12 +131,13 @@ router.post("/:id/trigger", async (c) => {
         toolName: s.tool,
         input: s.input,
         output: (s.output ?? null) as unknown,
-        status:
+        status: (
           s.status === "SUCCESS"
             ? "SUCCESS"
             : s.status === "FAILED"
               ? "FAILED"
-              : "SKIPPED",
+              : "SKIPPED"
+        ) as "SUCCESS" | "FAILED" | "SKIPPED",
         error: s.error ?? null,
         durationMs: s.durationMs,
         startedAt,
