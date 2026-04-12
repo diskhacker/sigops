@@ -6,11 +6,13 @@ export const createAgentSchema = z.object({
   os: z.string().min(1).optional(),
   version: z.string().min(1),
   status: z.string().min(1).optional(),
+  labels: z.record(z.unknown()).optional(),
 });
 
 export const updateAgentSchema = z.object({
   status: z.string().min(1).optional(),
   tools: z.array(z.unknown()).optional(),
+  labels: z.record(z.unknown()).optional(),
   lastHeartbeat: z.coerce.date().optional(),
 });
 
