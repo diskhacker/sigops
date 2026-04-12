@@ -6,6 +6,7 @@ export const createWorkflowSchema = z.object({
   selCode: z.string().min(1),
   triggerRules: z.record(z.unknown()),
   isActive: z.boolean().optional(),
+  tags: z.array(z.string()).optional(),
 });
 
 export const updateWorkflowSchema = z.object({
@@ -14,6 +15,7 @@ export const updateWorkflowSchema = z.object({
   selCode: z.string().min(1).optional(),
   triggerRules: z.record(z.unknown()).optional(),
   isActive: z.boolean().optional(),
+  tags: z.array(z.string()).optional(),
 });
 
 export const searchWorkflowSchema = z.object({

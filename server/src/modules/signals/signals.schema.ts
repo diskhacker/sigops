@@ -8,8 +8,10 @@ export const createSignalSchema = z.object({
 });
 
 export const updateSignalSchema = z.object({
-  status: z.enum(["OPEN", "ACKNOWLEDGED", "RESOLVED"]).optional(),
+  status: z.enum(["OPEN", "ACKNOWLEDGED", "RESOLVED", "SUPPRESSED"]).optional(),
   matchedWorkflowId: z.string().optional(),
+  resolvedBy: z.string().optional(),
+  metadata: z.record(z.unknown()).optional(),
 });
 
 export const searchSignalSchema = z.object({

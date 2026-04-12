@@ -77,9 +77,20 @@ router.put("/:id", async (c) => {
   const tenantId = c.get("tenantId");
   const id = c.req.param("id");
   const body = updateSignalSchema.parse(await c.req.json());
+  const updates: Record<string, unknown> = { ...body };
+  if (body.status === "RESOLVED") {
+    updates.resolvedAt = new Date();
+    if (!body.resolvedBy) {
+      const user = c.get("user");
+      updates.resolvedBy = user?.sub ?? "unknown";
+    }
+  }
+  if (body.matchedWorkflowId) {
+    updates.matchedAt = new Date();
+  }
   const [row] = await db
     .update(signals)
-    .set(body)
+    .set(updates)
     .where(and(eq(signals.id, id), eq(signals.tenantId, tenantId)))
     .returning();
   if (!row) throw new NotFoundError("Signal");
