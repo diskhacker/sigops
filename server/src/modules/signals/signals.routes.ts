@@ -97,6 +97,39 @@ router.put("/:id", async (c) => {
   return c.json(row);
 });
 
+/** PUT /:id/acknowledge — transition signal to ACKNOWLEDGED */
+router.put("/:id/acknowledge", async (c) => {
+  const tenantId = c.get("tenantId");
+  const id = c.req.param("id");
+  const [row] = await db
+    .update(signals)
+    .set({ status: "ACKNOWLEDGED" })
+    .where(and(eq(signals.id, id), eq(signals.tenantId, tenantId)))
+    .returning();
+  if (!row) throw new NotFoundError("Signal");
+  return c.json(row);
+});
+
+/** GET /search — search signals by content (title, body) */
+router.get("/search", async (c) => {
+  const tenantId = c.get("tenantId");
+  const pagination = paginationSchema.parse(c.req.query());
+  const q = c.req.query("q") ?? "";
+  const conds = [eq(signals.tenantId, tenantId)];
+  if (q) conds.push(ilike(signals.title, `%${q}%`));
+  const items = await db
+    .select()
+    .from(signals)
+    .where(and(...conds))
+    .limit(pagination.pageSize)
+    .offset(getOffset(pagination));
+  const [{ count }] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(signals)
+    .where(and(...conds));
+  return c.json(buildPageResponse(items, count, pagination));
+});
+
 router.delete("/:id", async (c) => {
   const tenantId = c.get("tenantId");
   const id = c.req.param("id");

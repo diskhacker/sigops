@@ -14,6 +14,7 @@ import executionSteps from "./modules/execution-steps/execution-steps.routes.js"
 import agentTools from "./modules/agent-tools/agent-tools.routes.js";
 import ingest from "./modules/ingest/ingest.routes.js";
 import stats from "./modules/stats/stats.routes.js";
+import sel from "./modules/sel/sel.routes.js";
 
 export function createApp() {
   const app = new Hono();
@@ -49,6 +50,7 @@ export function createApp() {
   app.route("/api/v1/agent-tools", agentTools);
   app.route("/api/v1/ingest", ingest);
   app.route("/api/v1/stats", stats);
+  app.route("/api/v1/sel", sel);
 
   return app;
 }

@@ -5,6 +5,7 @@ import { agents } from "../../db/schema.js";
 import { requireAuth } from "../../middleware/auth.js";
 import { NotFoundError } from "../../lib/errors.js";
 import { paginationSchema, getOffset, buildPageResponse } from "../../lib/pagination.js";
+import { handleHeartbeat } from "../../lib/agent-gateway.js";
 import type { AppVariables } from "../../lib/hono-types.js";
 import {
   createAgentSchema,
@@ -67,6 +68,31 @@ router.put("/:id", async (c) => {
     .returning();
   if (!row) throw new NotFoundError("Agent");
   return c.json(row);
+});
+
+/** POST /register — register a new agent (alias for POST /) */
+router.post("/register", async (c) => {
+  const tenantId = c.get("tenantId");
+  const body = createAgentSchema.parse(await c.req.json());
+  const [row] = await db
+    .insert(agents)
+    .values({ ...body, tenantId })
+    .returning();
+  return c.json(row, 201);
+});
+
+/** POST /:id/heartbeat — agent heartbeat + tool discovery */
+router.post("/:id/heartbeat", async (c) => {
+  const tenantId = c.get("tenantId");
+  const agentId = c.req.param("id");
+  const body = (await c.req.json().catch(() => ({}))) as Record<string, unknown>;
+  const result = await handleHeartbeat({
+    agentId,
+    tenantId,
+    tools: body.tools as unknown[] | undefined,
+    labels: body.labels as Record<string, unknown> | undefined,
+  });
+  return c.json(result);
 });
 
 router.delete("/:id", async (c) => {

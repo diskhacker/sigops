@@ -1,7 +1,8 @@
 import { Hono } from "hono";
 import { and, eq, sql } from "drizzle-orm";
+import { z } from "zod";
 import { db } from "../../db/index.js";
-import { workflows, executions, executionSteps } from "../../db/schema.js";
+import { workflows, executions, executionSteps, workflowSchedules } from "../../db/schema.js";
 import { requireAuth } from "../../middleware/auth.js";
 import { NotFoundError, ValidationError } from "../../lib/errors.js";
 import { paginationSchema, getOffset, buildPageResponse } from "../../lib/pagination.js";
@@ -158,6 +159,49 @@ router.post("/:id/trigger", async (c) => {
     .returning();
 
   return c.json({ execution: updated, result }, 200);
+});
+
+const scheduleSchema = z.object({
+  cronExpression: z.string().min(1),
+  timezone: z.string().optional(),
+  isActive: z.boolean().optional(),
+});
+
+/** POST /:id/schedule — set a cron schedule for this workflow */
+router.post("/:id/schedule", async (c) => {
+  const tenantId = c.get("tenantId");
+  const id = c.req.param("id");
+  const body = scheduleSchema.parse(await c.req.json());
+
+  // Verify workflow exists
+  const [wf] = await db
+    .select()
+    .from(workflows)
+    .where(and(eq(workflows.id, id), eq(workflows.tenantId, tenantId)))
+    .limit(1);
+  if (!wf) throw new NotFoundError("Workflow");
+
+  // Upsert schedule for this workflow
+  const [existing] = await db
+    .select()
+    .from(workflowSchedules)
+    .where(and(eq(workflowSchedules.workflowId, id), eq(workflowSchedules.tenantId, tenantId)))
+    .limit(1);
+
+  if (existing) {
+    const [updated] = await db
+      .update(workflowSchedules)
+      .set(body)
+      .where(eq(workflowSchedules.id, existing.id))
+      .returning();
+    return c.json(updated);
+  }
+
+  const [row] = await db
+    .insert(workflowSchedules)
+    .values({ ...body, workflowId: id, tenantId })
+    .returning();
+  return c.json(row, 201);
 });
 
 router.delete("/:id", async (c) => {
