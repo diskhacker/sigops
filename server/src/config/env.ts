@@ -10,7 +10,7 @@ const envSchema = z.object({
   JWT_AUDIENCE: z.string().default("sigops"),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
   FRONTEND_URL: z.string().default("http://localhost:4201"),
-  UAP_URL: z.string().url().optional().default(""),
+  UAP_URL: z.string().default(""),
 });
 
 export type Env = z.infer<typeof envSchema>;
