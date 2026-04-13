@@ -89,6 +89,24 @@ router.get("/", async (c) => {
   });
 });
 
+router.get("/recent-executions", async (c) => {
+  const tenantId = c.get("tenantId");
+  const rows = await db
+    .select({
+      id: executions.id,
+      workflowId: executions.workflowId,
+      status: executions.status,
+      triggerType: executions.triggerType,
+      durationMs: executions.durationMs,
+      createdAt: executions.createdAt,
+    })
+    .from(executions)
+    .where(eq(executions.tenantId, tenantId))
+    .orderBy(sql`${executions.createdAt} desc`)
+    .limit(5);
+  return c.json({ executions: rows });
+});
+
 router.get("/signals-trend", async (c) => {
   const tenantId = c.get("tenantId");
   const rows = await db
