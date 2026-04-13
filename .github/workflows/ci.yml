@@ -1,26 +1,31 @@
 name: CI
-
 on:
-  push:
-    branches: [main, "claude/**"]
-  pull_request:
-
+  push: { branches: [main] }
+  pull_request: { branches: [main] }
 jobs:
   server:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: server
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env: { POSTGRES_DB: test_db, POSTGRES_USER: postgres, POSTGRES_PASSWORD: postgres }
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
+        with: { version: 9 }
       - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-        working-directory: .
-      - run: npx tsc --noEmit
-      - run: npx vitest run
+        with: { node-version: 20 }
+      - run: cd server && pnpm install --frozen-lockfile
+      - run: cd server && pnpm typecheck
+      - run: cd server && pnpm lint
+      - run: cd server && pnpm test:coverage
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+          REDIS_URL: redis://localhost:6379
+          JWT_SECRET: test-secret-minimum-32-characters-long-for-hs256
+          NODE_ENV: test
