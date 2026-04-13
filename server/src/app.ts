@@ -21,6 +21,17 @@ export function createApp() {
 
   app.use("*", requestId);
 
+  /* ─── Security headers ─── */
+  app.use("*", async (c, next) => {
+    await next();
+    c.header("X-Content-Type-Options", "nosniff");
+    c.header("X-Frame-Options", "DENY");
+    c.header(
+      "Strict-Transport-Security",
+      "max-age=63072000; includeSubDomains; preload",
+    );
+  });
+
   app.onError((err, c) => {
     if (err instanceof ZodError) {
       return c.json(
