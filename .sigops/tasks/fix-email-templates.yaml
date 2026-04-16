@@ -1,0 +1,16 @@
+name: fix-email-templates
+description: "Task: fix-email-templates"
+version: 1.0.0
+script: ./scripts/fix-email-templates.js
+inputs:
+  input_file:
+    type: string
+    required: true
+    description: Input file path
+  dry_run:
+    type: boolean
+    default: true
+    description: Run without making changes
+run: node {{script}} --input={{input_file}} --dry-run={{dry_run}}
+timeout: 300
+tags: []

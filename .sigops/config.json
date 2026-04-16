@@ -1,0 +1,8 @@
+{
+  "version": "1.0.0",
+  "tasksDir": "tasks",
+  "historyFile": "history.json",
+  "maxHistoryEntries": 500,
+  "defaultTimeout": 300,
+  "outputCapture": 50
+}

@@ -1,0 +1,36 @@
+{
+  "name": "@sigops/cli",
+  "version": "1.0.0",
+  "description": "SigOps Task Registry — register, run, and track your automation scripts",
+  "author": "ClusterAssets Innovation Pvt. Ltd.",
+  "license": "MIT",
+  "bin": {
+    "sigops": "./bin/sigops.js"
+  },
+  "main": "./dist/cli.js",
+  "files": [
+    "dist/",
+    "bin/",
+    "templates/"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/cli.js",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "commander": "^13.1.0",
+    "dotenv": "^16.5.0",
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.15.3",
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,54 @@
+# SigOps Task Definition
+# Docs: sigops inspect <task-name>
+
+name: my-task
+description: What this task does
+version: 1.0.0
+
+# Path to your script (relative to where you run sigops)
+script: ./scripts/my-task.js
+
+# Inputs — users pass these as --key=value
+inputs:
+  input_file:
+    type: file          # string | number | boolean | file | select
+    required: true
+    description: Input file to process
+
+  target:
+    type: select
+    required: true
+    description: Target environment
+    options:
+      - dev
+      - staging
+      - production
+
+  dry_run:
+    type: boolean
+    default: true
+    description: Preview changes without applying
+
+  db_uri:
+    type: string
+    default: "${DATABASE_URL}"    # Resolves from .env or environment
+    secret: true                  # Masked in logs and history
+    description: Database connection string
+
+# Command to execute — {{variables}} replaced with input values
+run: "node {{script}} --file={{input_file}} --target={{target}} --dry-run={{dry_run}}"
+
+# Optional: extra environment variables for the process
+env:
+  NODE_ENV: production
+
+# Optional: working directory (default: current directory)
+# cwd: ./my-project
+
+# Optional: timeout in seconds (default: 300)
+timeout: 300
+
+# Optional: tags for filtering with sigops list --tag
+tags:
+  - database
+  - maintenance
