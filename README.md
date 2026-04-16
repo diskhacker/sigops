@@ -38,9 +38,9 @@ SigOps is a governed, AI-assisted execution OS that converts any operational sig
 - **Adapter Layer** — Coexist with PagerDuty, Datadog, Grafana (bidirectional adapters)
 - **Dashboard** — Signal list, execution viewer, agent management, stats
 
-### Premium Features (in sigops-cloud, proprietary)
-
-AI Advisor, Marketplace, Analytics, Knowledge Engine, On-Call, Postmortems, War Room, Status Page, Chaos Engineering, SigOps Graph, Blast Radius Predictor, Predictive Incidents, Health Score, Academy & Certification, 6 Plugins (SigShield, SigLens, SigProbe, SigTrace, SigShift, SigDocs)
+For production features (on-call, war rooms, postmortems, status pages, AI
+advisor, knowledge engine, marketplace, enterprise SSO), see the **SigOps
+Cloud** section near the end of this README.
 
 ---
 
@@ -71,14 +71,14 @@ sigops/
 │   ├── drizzle.config.ts
 │   ├── vitest.config.ts          # Test config (>90% coverage)
 │   └── src/
-│       ├── index.ts              # App entry + UAP registration
+│       ├── index.ts              # App entry + identity-provider registration
 │       ├── config/index.ts       # Env validation (Zod)
 │       ├── db/
 │       │   ├── schema.ts         # ALL Drizzle table definitions
 │       │   ├── migrations/       # Drizzle migrations
 │       │   └── seed.ts           # Seed data
 │       ├── lib/
-│       │   ├── uap-client.ts     # @cluster/uap-client
+│       │   ├── uap-client.ts     # @cluster/uap-client (identity provider HTTP client)
 │       │   └── auth.ts           # @cluster/auth-middleware
 │       ├── modules/
 │       │   └── <module>/
@@ -133,7 +133,7 @@ cd sigops
 
 # 2. Environment
 cp .env.example .env
-# Edit .env: set JWT_SECRET (shared with UAP), DATABASE_URL, REDIS_URL
+# Edit .env: set JWT_SECRET, AUTH_PROVIDER_URL, DATABASE_URL, REDIS_URL
 
 # 3. Start databases
 docker compose up -d
@@ -185,9 +185,9 @@ DATABASE_URL=postgresql://postgres:postgres@localhost:5432/sigops_dev
 # Redis
 REDIS_URL=redis://localhost:6372
 
-# UAP Integration (required — this product depends on UAP)
-UAP_URL=http://localhost:4100/api/v1
-UAP_API_KEY=<service-api-key-from-uap>
+# Identity provider (required — issues HS256 JWT tokens)
+AUTH_PROVIDER_URL=<url-of-your-identity-provider>
+AUTH_PROVIDER_API_KEY=<service-key-for-product-registration>
 JWT_SECRET=<shared-hs256-secret-min-32-chars>
 
 # Product Identity
@@ -202,24 +202,24 @@ LOG_LEVEL=debug
 
 ---
 
-## UAP Dependency
+## Authentication
 
-This product does **NOT** handle authentication, users, tenants, billing, RBAC, notifications, audit logging, or AI management. All of these are provided by the **Universal Admin Platform (UAP)**.
+SigOps requires an external identity provider that issues HS256 JWT tokens.
+Configure via `JWT_SECRET` (shared secret) and `AUTH_PROVIDER_URL` env vars.
 
-**UAP must be running before starting this product.**
+SigOps deliberately does **not** include its own auth, tenants, billing,
+RBAC, notifications, or audit-logging stack — those are the identity
+provider's concern. Compatible with any provider that:
 
-At boot, this product registers itself with UAP:
-```
-POST http://localhost:4100/api/v1/products/register
-{
-  "name": "sigops",
-  "displayName": "SigOps",
-  "plans": [...],
-  "roles": [...]
-}
-```
+- issues HS256 JWT tokens
+- includes `sub` (user id), `tid` (tenant id), and `permissions` claims
+- verifies locally via shared secret (no per-request auth roundtrip)
 
-JWT tokens are issued by UAP and verified locally using the shared HS256 secret. No per-request calls to UAP.
+ClusterAssets operates a managed identity layer — see **SigOps Cloud** below.
+
+At boot, SigOps registers itself with the configured provider
+(`POST ${AUTH_PROVIDER_URL}/products/register`) so that admins can map roles,
+plans, and notification templates from a single control plane.
 
 ---
 
@@ -229,7 +229,7 @@ This product uses shared `@cluster/*` packages from the `cluster-shared` repo:
 
 | Package | Purpose |
 |---------|---------|
-| `@cluster/uap-client` | HTTP client for UAP APIs |
+| `@cluster/uap-client` | HTTP client for the configured identity provider |
 | `@cluster/auth-middleware` | JWT verification + RBAC + tenant isolation |
 | `@cluster/drizzle-utils` | Pagination, audit logging, soft delete helpers |
 | `@cluster/zod-schemas` | Shared validation schemas (pagination, errors) |
@@ -305,23 +305,39 @@ Coverage thresholds (enforced in vitest.config.ts):
 
 ---
 
-## Part of ClusterAssets Ecosystem
+## SigOps Cloud
 
-SigOps is one of 11 products in the ClusterAssets ecosystem, all sharing the UAP foundation:
+SigOps open-source gives you the execution engine. **SigOps Cloud** adds what
+production teams need on top:
 
-| Product | Domain | Port |
-|---------|--------|------|
-| **UAP** | Platform (Auth, Billing, RBAC, AI) | 4100 |
-| **SigOps** | Infrastructure Execution OS | 4200 |
-| **Credora** | Financial Operating System | 4300 |
-| **Assera** | NRI Property + Elderly Care | 4400 |
-| **Talentra** | Follow-the-Sun Operations | 4500 |
-| **Armexa** | Security Command & SOC | 4600 |
-| **Futurevo** | Child Career Guidance | 4700 |
-| **Movana** | Mobility Intelligence | 4800 |
-| **Lifetra** | Health & Wellness | 4900 |
-| **Paynex** | Payments & Gold Finance | 5000 |
-| **Novix** | AI R&D Lab (Internal) | 5100 |
+### Intelligence
+
+- **AI Advisor** — incident context summaries, suggested remediation
+- **Knowledge Engine** — runbook RAG over your Confluence / docs
+
+### Incident Management
+
+- **On-Call** schedules with escalation chains
+- **War Room** — real-time collaboration on active incidents
+- **Postmortem** workflow with templates
+- **Status Page** (public + private)
+- **SLA Tracker** with breach alerts
+
+### Enterprise
+
+- SSO (SAML, OIDC)
+- Audit log export (S3, SIEM integrations)
+- Advanced RBAC with custom roles
+- Multi-region deployment
+- Dedicated support SLA
+
+### Marketplace
+
+- Curated tool registry
+- Pre-built integrations (PagerDuty, Datadog, Slack, JIRA, and more)
+- Community playbooks
+
+**Managed hosting · Identity included · [Learn more →](https://sigops.clusterassets.com)**
 
 ---
 
