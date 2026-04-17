@@ -39,5 +39,6 @@
     "supertest": "^7.0.0",
     "@types/supertest": "^6.0.0",
     "@types/node": "^22.0.0"
-  }
+  },
+  "packageManager": "pnpm@10.33.0"
 }
