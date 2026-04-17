@@ -30,3 +30,4 @@ jobs:
           REDIS_URL: redis://localhost:6379
           JWT_SECRET: test-secret-minimum-32-characters-long-for-hs256
           NODE_ENV: test
+
