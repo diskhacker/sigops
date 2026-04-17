@@ -5,7 +5,7 @@
 ## Recent Changes (Sprint 1.5 — 2026-04-17)
 
 - **README rewritten.** Unimplemented feature claims moved to Roadmap: FlowBuilder, bidirectional adapters, WebSocket agent gateway, email polling, rate limiting on ingest, OpenTelemetry / Prometheus metrics export, and Cloud features without code (SSO, audit-log export, multi-region).
-- **Docker CI added.** `.github/workflows/docker.yml` builds+pushes `ghcr.io/diskhacker/sigops-server` and `ghcr.io/diskhacker/sigops-ui` on `v*.*.*` tags and manual dispatch.
+- **Docker CI added.** `.github/workflows/docker.yml` builds+pushes `ghcr.io/diskhacker/sigops-server` and `ghcr.io/diskhacker/sigops-ui` on `v*.*.*` tags and manual dispatch. CI uses `server/Dockerfile` (non-root: `USER node`). The root `Dockerfile` is unused in CI — to be deleted in v0.1.1.
 - **Migration path documented.** `server/package.json` now has `db:migrate` (drizzle-kit migrate). **Do NOT use `db:push` in production.**
 - **Agent transport reality.** The agent today is HTTP long-polling, not WSS. `Agent WebSocket gateway` in the Module Build Order below is aspirational and not yet implemented.
 

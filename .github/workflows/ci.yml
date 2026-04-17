@@ -17,9 +17,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with: { version: 9 }
+        # version resolved from packageManager field in package.json (pnpm@10.33.0)
       - uses: actions/setup-node@v4
-        with: { node-version: 20 }
+        with: { node-version: 20, cache: pnpm }
       - run: cd server && pnpm install --frozen-lockfile
       - run: cd server && pnpm typecheck
       # lint step disabled for v0.1.0 — ESLint 9 flat-config migration pending.
