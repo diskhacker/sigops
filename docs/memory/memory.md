@@ -1,12 +1,12 @@
 # ClusterAssets — Project Memory
 
-> Single source of truth. Read FIRST in every session. Updated: 2026-04-12
+> Single source of truth. Read FIRST in every session. Updated: 2026-04-21
 
 ## Ecosystem
-11 SaaS products + UAP foundation. 15 repos (3 PUBLIC, 12 PRIVATE). ~362 tables, ~730 endpoints.
+11 SaaS products + UAP foundation. 15 repos (3 PUBLIC, 12 PRIVATE). ~366 tables, ~730 endpoints.
 
 ## Products
-UAP (43t/98e), SigOps (10t/25e), Credora (114t/190e), Assera (26t/72e), Talentra (54t/110e), Armexa (18t/48e), Futurevo (12t/30e), Movana (22t/65e), Lifetra (18t/45e), Paynex (35t/72e), Novix (10t/20e).
+UAP (44t/98e), SigOps (13t/25e), Credora (114t/190e), Assera (26t/72e), Talentra (54t/110e), Armexa (18t/48e), Futurevo (12t/30e), Movana (22t/65e), Lifetra (18t/45e), Paynex (35t/72e), Novix (10t/20e).
 
 ## SigOps SDK (6 packages, ALL PUBLIC MIT)
 @sigops/cli, @sigops/tool-sdk, @sigops/template-sdk, @sigops/sel-tools, @sigops/vscode-ext, @sigops/plugin-sdk. Supports tool + template + connector + plugin development. sel-tools PUBLIC because cli+template-sdk+vscode-ext depend on it. vscode-ext PUBLIC because VS Code Marketplace policy + developer trust.
@@ -25,3 +25,4 @@ Each product = 1 repo with server/+ui/ (monorepo). sigops-sdk + cluster-shared =
 ## Sessions
 - session-001 (2026-04-10): Architecture docs (28 files), repo plan, CLAUDE.md Set 1
 - session-002 (2026-04-12): SDK arch+manual (4 files), deep audit, PS1 fixed (15 repos), audit prompt
+- session-003 (2026-04-21): Supportability sprint (GAP 1–8 UAP+SigOps), production-readiness audit + security hardening, 684 UAP + 263 SigOps tests passing

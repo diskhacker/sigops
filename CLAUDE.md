@@ -2,14 +2,20 @@
 
 > Open Source Core (MIT) + Proprietary Cloud. Rust Agent. SEL Language.
 
+## Recent Changes (Production-Readiness Audit — 2026-04-21)
+
+- **Security hardening:** `platform-config` routes now normalize roles via `flattenRoles()` which handles both `string[]` (regular JWT) and `Record<string, string[]>` (including impersonation token's empty `{}`). Logger level is set **after** the audit log DB write (was before — inconsistency on DB failure).
+- **Startup wiring:** `applyPersistedLogLevel()` called on boot to restore persisted log level from DB. Spike detector cron wired: runs immediately on boot, then every 5 minutes via `setInterval(...).unref()`.
+- **UI wiring:** SigOps receives correctly typed UAP impersonation tokens (roles: `{}` not `[]`); `flattenRoles` handles both union types without breaking permission checks.
+
 ## Recent Changes (Supportability Sprint — 2026-04-21)
 
 - **GAP 8 (sigops):** Health endpoint returns version/commit/built\_at/uptime; sidebar footer version chip; Docker build args `GIT_COMMIT` + `BUILD_TIME`.
 - **GAP 3 (sigops):** OpenAPI 3.0.3 spec at `/docs/json`; Swagger UI at `/docs` (gated: non-production or `SWAGGER_ENABLED=true`).
-- **GAP 1 (sigops):** `GET/PUT /api/v1/platform-config/log-level`; pino level mutated at runtime; startup reads from DB; audit trail; UI panel in PlatformConfigPage.
+- **GAP 1 (sigops):** `GET/PUT /api/v1/platform-config/log-level`; pino level mutated at runtime; **startup now reads from DB on boot** via `applyPersistedLogLevel()`; audit trail; UI panel in PlatformConfigPage.
 - **GAP 5 (sigops):** `GET /api/v1/trace/:id` — aggregated trace view; executions filtered by `trace_id`; Trace Search UI tab in ExecutionsPage.
-- **GAP 6 (sigops):** `GET /api/v1/executions/:id/waterfall` — offset\_ms+depth per step; CSS percentage-bar WaterfallPage with slowest-step badge + step detail panel.
-- **GAP 4 (sigops):** `usage_baselines` table; 5-min cron spike detector; `notify_customer` signal + in-app notification; PUT `/api/v1/usage-baselines/:id`; UsageThresholds UI panel. 263 tests passing.
+- **GAP 6 (sigops):** Execution waterfall is **inline in execution detail** (`GET /api/v1/executions/:id` includes waterfall steps); WaterfallPage renders offset\_ms+depth per step; CSS percentage-bar with slowest-step badge + step detail panel.
+- **GAP 4 (sigops):** `usageBaselines` table; **5-min spike detector cron now wired to startup** (runs on boot + every 5 min via `setInterval.unref()`); `notify_customer` signal + in-app notification; PUT `/api/v1/usage-baselines/:id`; UsageThresholds UI panel. 263 tests passing.
 
 ## Recent Changes (Sprint 1.5 — 2026-04-17)
 
@@ -45,13 +51,31 @@ Session: /docs/session/ | Memory: /docs/memory/memory.md
 ```
 
 ## UAP Integration
-Same pattern as all products. Product ID: `sigops`. Roles: sigops_admin (*), operator (signals/executions/workflows/tools), developer (read+workflows+sel), viewer (read-only).
+Product ID: `sigops`. Built-in roles (seeded by UAP on every boot):
+- `platform_admin` — `["*"]`, isDefault: false
+- `support_engineer` — `executions:read`, `signals:read`, `audit_logs:read`, `users:read`, `users:impersonate`, `platform_config:log_level:write`, `trace:read`; isDefault: false
+- `tenant_admin` — `executions:*`, `signals:*`, `workflows:*`, `users:read`, `platform_config:read`; isDefault: **true**
+- `tenant_user` — `executions:read`, `executions:create`, `signals:read`; isDefault: false
+
+All roles have `isSystem: true` (protected — UAP never lets tenants delete them).
+
+### Role normalization in SigOps
+JWT `roles` field is `Record<string, string[]>` (UAP) or `string[]` (legacy). Use `flattenRoles()` from `platform-config.routes.ts` pattern whenever checking roles.
 
 ---
 
-## COMPLETE DRIZZLE SCHEMA (10 Tables)
+## COMPLETE DRIZZLE SCHEMA (13 Tables)
 
-See the schema block in the repo's `server/src/db/schema.ts` for the source of truth. The build spec that formerly lived here has been moved into code.
+See `server/src/db/schema.ts` for the source of truth.
+
+### Tables (13)
+`signals` `workflows` `executions` `agents` `toolRegistry` `signalRules` `workflowSchedules` `executionSteps` `agentTools` `usageBaselines` `notifications` `platformConfig` `auditLogs`
+
+### Key startup sequence (index.ts)
+1. `applyPersistedLogLevel()` — restore pino log level from `platformConfig` table
+2. `registerWithUap()` — best-effort product registration (catch → silent)
+3. `runSpikeDetection()` — immediate first run
+4. `setInterval(runSpikeDetection, 5 * 60 * 1000).unref()` — recurring cron
 
 ## MODULE BUILD ORDER
 ```
@@ -75,3 +99,5 @@ See the schema block in the repo's `server/src/db/schema.ts` for the source of t
 5. Zod-validate every request.
 6. README claims must match code that is on `main` today.
 7. Production migrations use `db:migrate`. Never `db:push` in production.
+8. **Logger level MUST be set AFTER audit log DB write** — never mutate `logger.level` before all DB operations succeed.
+9. **Use `flattenRoles()` for all role checks** — handles both `string[]` and `Record<string, string[]>` union type.

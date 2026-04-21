@@ -41,12 +41,9 @@ export async function setLogLevel(
     });
   }
 
-  // Apply to live logger instance
-  logger.level = newLevel;
-
   const changedAt = new Date().toISOString();
 
-  // Write audit event
+  // Write audit event — must succeed before mutating live logger
   await db.insert(auditLogs).values({
     actorId,
     action: "log_level_changed",
@@ -56,6 +53,9 @@ export async function setLogLevel(
     after: { level: newLevel },
     metadata: { changedAt },
   });
+
+  // Apply to live logger only after all DB writes succeed
+  logger.level = newLevel;
 
   return { previous, current: newLevel, changedAt };
 }
