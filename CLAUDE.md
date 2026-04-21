@@ -7,6 +7,7 @@
 - **README rewritten.** Unimplemented feature claims moved to Roadmap: FlowBuilder, bidirectional adapters, WebSocket agent gateway, email polling, rate limiting on ingest, OpenTelemetry / Prometheus metrics export, and Cloud features without code (SSO, audit-log export, multi-region).
 - **Docker CI added.** `.github/workflows/docker.yml` builds+pushes `ghcr.io/diskhacker/sigops-server` and `ghcr.io/diskhacker/sigops-ui` on `v*.*.*` tags and manual dispatch. CI uses `server/Dockerfile` (non-root: `USER node`). The root `Dockerfile` is unused in CI — to be deleted in v0.1.1.
 - **Migration path documented.** `server/package.json` now has `db:migrate` (drizzle-kit migrate). **Do NOT use `db:push` in production.**
+- **Coverage threshold corrected.** HARD RULES updated from ">90% coverage" to the actual vitest config thresholds (lines/functions/statements: 80%, branches: 85%). Measured coverage is 82.79%.
 - **Agent transport reality.** The agent today is HTTP long-polling, not WSS. `Agent WebSocket gateway` in the Module Build Order below is aspirational and not yet implemented.
 
 See `docs/session/2026-04-17-sprint-1.5.md` and `docs/memory/2026-04-17-sprint-1.5.md`.
@@ -58,7 +59,7 @@ See the schema block in the repo's `server/src/db/schema.ts` for the source of t
 ```
 
 ## HARD RULES
-1. Every feature ships UI + Backend + Tests (>90% coverage).
+1. Every feature ships UI + Backend + Tests — Test coverage ≥80% (lines/functions/statements), ≥85% (branches) — vitest thresholds enforced in CI.
 2. Tenant isolation on every query.
 3. JWT verification is local — do not round-trip to the identity provider per request.
 4. Audit every mutation.
