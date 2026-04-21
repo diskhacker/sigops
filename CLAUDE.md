@@ -2,6 +2,15 @@
 
 > Open Source Core (MIT) + Proprietary Cloud. Rust Agent. SEL Language.
 
+## Recent Changes (Supportability Sprint — 2026-04-21)
+
+- **GAP 8 (sigops):** Health endpoint returns version/commit/built\_at/uptime; sidebar footer version chip; Docker build args `GIT_COMMIT` + `BUILD_TIME`.
+- **GAP 3 (sigops):** OpenAPI 3.0.3 spec at `/docs/json`; Swagger UI at `/docs` (gated: non-production or `SWAGGER_ENABLED=true`).
+- **GAP 1 (sigops):** `GET/PUT /api/v1/platform-config/log-level`; pino level mutated at runtime; startup reads from DB; audit trail; UI panel in PlatformConfigPage.
+- **GAP 5 (sigops):** `GET /api/v1/trace/:id` — aggregated trace view; executions filtered by `trace_id`; Trace Search UI tab in ExecutionsPage.
+- **GAP 6 (sigops):** `GET /api/v1/executions/:id/waterfall` — offset\_ms+depth per step; CSS percentage-bar WaterfallPage with slowest-step badge + step detail panel.
+- **GAP 4 (sigops):** `usage_baselines` table; 5-min cron spike detector; `notify_customer` signal + in-app notification; PUT `/api/v1/usage-baselines/:id`; UsageThresholds UI panel. 263 tests passing.
+
 ## Recent Changes (Sprint 1.5 — 2026-04-17)
 
 - **README rewritten.** Unimplemented feature claims moved to Roadmap: FlowBuilder, bidirectional adapters, WebSocket agent gateway, email polling, rate limiting on ingest, OpenTelemetry / Prometheus metrics export, and Cloud features without code (SSO, audit-log export, multi-region).
