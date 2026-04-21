@@ -29,6 +29,7 @@ const NAV = [
   { to: "/execution-steps", label: "Execution Steps" },
   { to: "/agent-tools", label: "Agent Tools" },
   { to: "/platform-config", label: "Platform Config" },
+  { to: "/waterfall", label: "Waterfall" },
 ];
 
 export default function Layout() {

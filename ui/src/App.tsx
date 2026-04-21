@@ -11,6 +11,7 @@ import WorkflowSchedulesPage from "./pages/WorkflowSchedulesPage.js";
 import ExecutionStepsPage from "./pages/ExecutionStepsPage.js";
 import AgentToolsPage from "./pages/AgentToolsPage.js";
 import PlatformConfigPage from "./pages/PlatformConfigPage.js";
+import WaterfallPage from "./pages/WaterfallPage.js";
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
         <Route path="execution-steps" element={<ExecutionStepsPage />} />
         <Route path="agent-tools" element={<AgentToolsPage />} />
         <Route path="platform-config" element={<PlatformConfigPage />} />
+        <Route path="waterfall" element={<WaterfallPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
