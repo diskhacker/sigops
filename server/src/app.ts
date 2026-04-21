@@ -5,6 +5,7 @@ import { AppError, errorResponse } from "./lib/errors.js";
 import health from "./routes/health.js";
 import docs from "./routes/docs.js";
 import platformConfig from "./modules/platform-config/platform-config.routes.js";
+import trace from "./modules/trace/trace.routes.js";
 import signals from "./modules/signals/signals.routes.js";
 import workflows from "./modules/workflows/workflows.routes.js";
 import executions from "./modules/executions/executions.routes.js";
@@ -54,6 +55,7 @@ export function createApp() {
   app.route("/health", health);
   app.route("/docs", docs);
   app.route("/api/v1/platform-config", platformConfig);
+  app.route("/api/v1/trace", trace);
   app.route("/api/v1/signals", signals);
   app.route("/api/v1/workflows", workflows);
   app.route("/api/v1/executions", executions);

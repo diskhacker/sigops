@@ -111,6 +111,7 @@ export const executions = pgTable(
     status: execStatusEnum("status").default("PENDING").notNull(),
     triggerType: text("trigger_type").notNull(),
     triggeredBy: text("triggered_by"),
+    traceId: text("trace_id"),
     riskScore: jsonb("risk_score"),
     error: jsonb("error"),
     startedAt: timestamp("started_at"),
@@ -122,6 +123,7 @@ export const executions = pgTable(
   (t) => [
     index("exec_tenant_created").on(t.tenantId, t.createdAt),
     index("exec_status").on(t.status),
+    index("exec_trace_id").on(t.traceId),
   ],
 );
 
