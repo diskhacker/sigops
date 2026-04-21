@@ -237,3 +237,38 @@ export const agentTools = pgTable(
     index("idx_agent_tools_tenant").on(t.tenantId),
   ],
 );
+
+// ── Platform config: key-value store for platform-level settings ──
+export const platformConfig = pgTable(
+  "platform_config",
+  {
+    id: id(),
+    key: text("key").notNull(),
+    value: text("value").notNull(),
+    updatedAt: updatedAt(),
+    updatedBy: text("updated_by"),
+  },
+  (t) => [uniqueIndex("idx_platform_config_key").on(t.key)],
+);
+
+// ── Audit logs for sigops mutations ──
+export const auditLogs = pgTable(
+  "audit_logs",
+  {
+    id: id(),
+    tenantId: text("tenant_id"),
+    actorId: text("actor_id"),
+    action: text("action").notNull(),
+    resourceType: text("resource_type"),
+    resourceId: text("resource_id"),
+    before: jsonb("before"),
+    after: jsonb("after"),
+    metadata: jsonb("metadata").default({}),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    index("idx_audit_actor").on(t.actorId),
+    index("idx_audit_action").on(t.action),
+    index("idx_audit_created").on(t.createdAt),
+  ],
+);

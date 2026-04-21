@@ -10,6 +10,7 @@ import SignalRulesPage from "./pages/SignalRulesPage.js";
 import WorkflowSchedulesPage from "./pages/WorkflowSchedulesPage.js";
 import ExecutionStepsPage from "./pages/ExecutionStepsPage.js";
 import AgentToolsPage from "./pages/AgentToolsPage.js";
+import PlatformConfigPage from "./pages/PlatformConfigPage.js";
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
         <Route path="workflow-schedules" element={<WorkflowSchedulesPage />} />
         <Route path="execution-steps" element={<ExecutionStepsPage />} />
         <Route path="agent-tools" element={<AgentToolsPage />} />
+        <Route path="platform-config" element={<PlatformConfigPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>

@@ -28,6 +28,7 @@ const NAV = [
   { to: "/workflow-schedules", label: "Workflow Schedules" },
   { to: "/execution-steps", label: "Execution Steps" },
   { to: "/agent-tools", label: "Agent Tools" },
+  { to: "/platform-config", label: "Platform Config" },
 ];
 
 export default function Layout() {
