@@ -111,6 +111,7 @@ export const executions = pgTable(
     status: execStatusEnum("status").default("PENDING").notNull(),
     triggerType: text("trigger_type").notNull(),
     triggeredBy: text("triggered_by"),
+    traceId: text("trace_id"),
     riskScore: jsonb("risk_score"),
     error: jsonb("error"),
     startedAt: timestamp("started_at"),
@@ -122,6 +123,7 @@ export const executions = pgTable(
   (t) => [
     index("exec_tenant_created").on(t.tenantId, t.createdAt),
     index("exec_status").on(t.status),
+    index("exec_trace_id").on(t.traceId),
   ],
 );
 
@@ -235,5 +237,76 @@ export const agentTools = pgTable(
   (t) => [
     index("idx_agent_tools_agent").on(t.agentId),
     index("idx_agent_tools_tenant").on(t.tenantId),
+  ],
+);
+
+// ── Usage baselines for spike detection ──
+export const usageBaselines = pgTable(
+  "usage_baselines",
+  {
+    id: id(),
+    tenantId: tenantId(),
+    metric: text("metric").notNull(),
+    baselineValue: text("baseline_value").notNull(), // stored as numeric string
+    spikeThreshold: text("spike_threshold").notNull().default("3.0"),
+    windowMinutes: integer("window_minutes").notNull().default(60),
+    lastComputed: timestamp("last_computed"),
+    updatedAt: updatedAt(),
+  },
+  (t) => [uniqueIndex("idx_usage_baselines_tenant_metric").on(t.tenantId, t.metric)],
+);
+
+// ── In-app notifications ──
+export const notifications = pgTable(
+  "notifications",
+  {
+    id: id(),
+    tenantId: tenantId(),
+    scope: text("scope").notNull().default("tenant_admin"),
+    type: text("type").notNull(),
+    title: text("title").notNull(),
+    body: text("body").notNull(),
+    metadata: jsonb("metadata").default({}),
+    readAt: timestamp("read_at"),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    index("idx_notifications_tenant").on(t.tenantId),
+    index("idx_notifications_read").on(t.readAt),
+  ],
+);
+
+// ── Platform config: key-value store for platform-level settings ──
+export const platformConfig = pgTable(
+  "platform_config",
+  {
+    id: id(),
+    key: text("key").notNull(),
+    value: text("value").notNull(),
+    updatedAt: updatedAt(),
+    updatedBy: text("updated_by"),
+  },
+  (t) => [uniqueIndex("idx_platform_config_key").on(t.key)],
+);
+
+// ── Audit logs for sigops mutations ──
+export const auditLogs = pgTable(
+  "audit_logs",
+  {
+    id: id(),
+    tenantId: text("tenant_id"),
+    actorId: text("actor_id"),
+    action: text("action").notNull(),
+    resourceType: text("resource_type"),
+    resourceId: text("resource_id"),
+    before: jsonb("before"),
+    after: jsonb("after"),
+    metadata: jsonb("metadata").default({}),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    index("idx_audit_actor").on(t.actorId),
+    index("idx_audit_action").on(t.action),
+    index("idx_audit_created").on(t.createdAt),
   ],
 );

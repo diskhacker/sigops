@@ -9,6 +9,7 @@ import {
   searchExecutionSchema,
 } from "./executions.schema.js";
 import * as executionService from "./executions.service.js";
+import { computeWaterfall } from "./waterfall.service.js";
 
 const router = new Hono<{ Variables: AppVariables }>();
 router.use("*", requireAuth);
@@ -29,7 +30,8 @@ router.get("/:id", async (c) => {
   const tenantId = c.get("tenantId");
   const id = c.req.param("id");
   const row = await executionService.getExecution(tenantId, id);
-  return c.json(row);
+  const waterfall = await computeWaterfall(tenantId, id, row.startedAt ?? null);
+  return c.json({ ...row, waterfall });
 });
 
 router.post("/", async (c) => {

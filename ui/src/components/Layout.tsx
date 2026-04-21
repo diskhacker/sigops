@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Outlet, NavLink } from "react-router-dom";
 import {
   AppBar,
@@ -9,8 +10,10 @@ import {
   Toolbar,
   Typography,
   TextField,
+  Tooltip,
 } from "@mui/material";
 import { useTenantStore } from "../lib/tenant-store.js";
+import { useVersionStore } from "../lib/version-store.js";
 
 const DRAWER_WIDTH = 220;
 
@@ -25,10 +28,17 @@ const NAV = [
   { to: "/workflow-schedules", label: "Workflow Schedules" },
   { to: "/execution-steps", label: "Execution Steps" },
   { to: "/agent-tools", label: "Agent Tools" },
+  { to: "/platform-config", label: "Platform Config" },
+  { to: "/waterfall", label: "Waterfall" },
 ];
 
 export default function Layout() {
   const { tenantId, setTenant } = useTenantStore();
+  const { info, fetch: fetchVersion } = useVersionStore();
+
+  useEffect(() => {
+    fetchVersion();
+  }, [fetchVersion]);
   return (
     <Box sx={{ display: "flex" }}>
       <AppBar
@@ -55,11 +65,11 @@ export default function Layout() {
         sx={{
           width: DRAWER_WIDTH,
           flexShrink: 0,
-          [`& .MuiDrawer-paper`]: { width: DRAWER_WIDTH, boxSizing: "border-box" },
+          [`& .MuiDrawer-paper`]: { width: DRAWER_WIDTH, boxSizing: "border-box", display: "flex", flexDirection: "column" },
         }}
       >
         <Toolbar />
-        <Box sx={{ overflow: "auto" }}>
+        <Box sx={{ overflow: "auto", flexGrow: 1 }}>
           <List>
             {NAV.map((n) => (
               <ListItemButton key={n.to} component={NavLink} to={n.to}>
@@ -68,6 +78,19 @@ export default function Layout() {
             ))}
           </List>
         </Box>
+        {info && (
+          <Tooltip
+            title={`Built: ${info.built_at} · Uptime: ${info.uptime_seconds}s`}
+            placement="top"
+          >
+            <Box
+              data-testid="version-chip"
+              sx={{ px: 2, py: 1.5, color: "text.secondary", fontSize: "0.7rem" }}
+            >
+              v{info.version} · {info.commit_sha.slice(0, 7)}
+            </Box>
+          </Tooltip>
+        )}
       </Drawer>
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Toolbar />

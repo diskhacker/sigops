@@ -11,6 +11,8 @@ const envSchema = z.object({
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
   FRONTEND_URL: z.string().default("http://localhost:4201"),
   UAP_URL: z.string().default(""),
+  GIT_COMMIT: z.string().default("unknown"),
+  BUILD_TIME: z.string().default("unknown"),
 });
 
 export type Env = z.infer<typeof envSchema>;

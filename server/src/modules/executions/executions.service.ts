@@ -35,6 +35,7 @@ export interface UpdateExecutionInput {
 export interface ExecutionFilters {
   workflowId?: string;
   status?: "PENDING" | "RUNNING" | "SUCCESS" | "FAILED" | "ROLLED_BACK" | "CANCELLED";
+  trace_id?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -80,6 +81,7 @@ export async function listExecutions(
   if (filters.workflowId)
     conds.push(eq(executions.workflowId, filters.workflowId));
   if (filters.status) conds.push(eq(executions.status, filters.status));
+  if (filters.trace_id) conds.push(eq(executions.traceId, filters.trace_id));
 
   const items = await db
     .select()

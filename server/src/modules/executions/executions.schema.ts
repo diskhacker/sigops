@@ -22,4 +22,5 @@ export const updateExecutionSchema = z.object({
 export const searchExecutionSchema = z.object({
   workflowId: z.string().optional(),
   status: z.enum(execStatusValues).optional(),
+  trace_id: z.string().optional(),
 });
