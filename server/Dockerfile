@@ -13,7 +13,11 @@ COPY src ./src
 RUN npx tsc
 
 FROM base AS runtime
-ENV NODE_ENV=production
+ARG GIT_COMMIT=unknown
+ARG BUILD_TIME=unknown
+ENV NODE_ENV=production \
+    GIT_COMMIT=$GIT_COMMIT \
+    BUILD_TIME=$BUILD_TIME
 COPY package.json package-lock.json* ./
 RUN npm install --omit=dev && npm cache clean --force
 COPY --from=build /app/dist ./dist

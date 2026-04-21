@@ -31,6 +31,9 @@ jobs:
           tags: |
             ${{ env.IMAGE_PREFIX }}/sigops-server:latest
             ${{ env.IMAGE_PREFIX }}/sigops-server:${{ github.ref_name }}
+          build-args: |
+            GIT_COMMIT=${{ github.sha }}
+            BUILD_TIME=${{ github.event.repository.updated_at }}
 
   build-ui:
     runs-on: ubuntu-latest
