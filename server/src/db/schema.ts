@@ -240,6 +240,42 @@ export const agentTools = pgTable(
   ],
 );
 
+// ── Usage baselines for spike detection ──
+export const usageBaselines = pgTable(
+  "usage_baselines",
+  {
+    id: id(),
+    tenantId: tenantId(),
+    metric: text("metric").notNull(),
+    baselineValue: text("baseline_value").notNull(), // stored as numeric string
+    spikeThreshold: text("spike_threshold").notNull().default("3.0"),
+    windowMinutes: integer("window_minutes").notNull().default(60),
+    lastComputed: timestamp("last_computed"),
+    updatedAt: updatedAt(),
+  },
+  (t) => [uniqueIndex("idx_usage_baselines_tenant_metric").on(t.tenantId, t.metric)],
+);
+
+// ── In-app notifications ──
+export const notifications = pgTable(
+  "notifications",
+  {
+    id: id(),
+    tenantId: tenantId(),
+    scope: text("scope").notNull().default("tenant_admin"),
+    type: text("type").notNull(),
+    title: text("title").notNull(),
+    body: text("body").notNull(),
+    metadata: jsonb("metadata").default({}),
+    readAt: timestamp("read_at"),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    index("idx_notifications_tenant").on(t.tenantId),
+    index("idx_notifications_read").on(t.readAt),
+  ],
+);
+
 // ── Platform config: key-value store for platform-level settings ──
 export const platformConfig = pgTable(
   "platform_config",
