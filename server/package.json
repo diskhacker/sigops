@@ -23,7 +23,7 @@
     "argon2": "^0.41.0",
     "bullmq": "^5.0.0",
     "drizzle-orm": "^0.45.2",
-    "hono": "^4.12.14",
+    "hono": "^4.12.18",
     "jose": "^5.9.0",
     "pino": "^9.0.0",
     "pino-pretty": "^11.0.0",
@@ -39,7 +39,7 @@
     "supertest": "^7.0.0",
     "tsx": "^4.19.0",
     "typescript": "^5.7.0",
-    "vitest": "^3.0.0"
+    "vitest": "^4.1.0"
   },
   "packageManager": "pnpm@10.33.0"
 }

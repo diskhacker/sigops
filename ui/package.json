@@ -21,7 +21,7 @@
     "@emotion/styled": "^11.14.0",
     "@tanstack/react-query": "^5.65.0",
     "zustand": "^5.0.0",
-    "axios": "^1.7.0",
+    "axios": "^1.16.0",
     "dayjs": "^1.11.0"
   },
   "devDependencies": {
@@ -30,7 +30,7 @@
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.0",
     "vite": "^6.1.0",
-    "vitest": "^3.0.0",
+    "vitest": "^4.1.0",
     "@testing-library/react": "^16.0.0",
     "jsdom": "^25.0.0"
   }
